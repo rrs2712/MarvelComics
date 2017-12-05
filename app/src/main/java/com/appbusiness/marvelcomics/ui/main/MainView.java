@@ -1,11 +1,13 @@
 package com.appbusiness.marvelcomics.ui.main;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 
 import com.appbusiness.marvelcomics.R;
+import com.appbusiness.marvelcomics.ui.detail.DetailView;
 
 public class MainView extends Activity implements IComic.View {
 
@@ -44,8 +46,8 @@ public class MainView extends Activity implements IComic.View {
         Bundle b = new Bundle();
         b.putString(ITEM_ID,id);
 
-/*        Intent i = new Intent(this, DetailView.class);
+        Intent i = new Intent(this, DetailView.class);
         i.putExtras(b);
-        startActivity(i);*/
+        startActivity(i);
     }
 }

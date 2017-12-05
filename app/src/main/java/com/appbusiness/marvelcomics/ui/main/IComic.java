@@ -24,5 +24,4 @@ public interface IComic {
     interface Model{
         void fillList(ListView lv, Activity context);
     }
-
 }
