@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.appbusiness.marvelcomics.R;
-import com.appbusiness.marvelcomics.data.model.Comic;
+import com.appbusiness.marvelcomics.data.model.Result;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -19,12 +19,12 @@ import java.util.List;
 
 /**
  *
- * Class extending {@link ArrayAdapter<Comic>} to create a customs ListView.
+ * Class extending {@link ArrayAdapter<Result>} to create a customs ListView.
  *
  * @author Raul RS
  * @version 1.0
  */
-public class ComicAdapter extends ArrayAdapter<Comic> {
+public class ComicAdapter extends ArrayAdapter<Result> {
 
     // Async image loader
     private ImageLoader imageloader = ImageLoader.getInstance();
@@ -33,10 +33,10 @@ public class ComicAdapter extends ArrayAdapter<Comic> {
      * Class constructor.
      *
      * @param context - {@link Activity}
-     * @param procedures - {@link List<Comic>}
+     * @param comics - {@link List<Result>}
      */
-    public ComicAdapter(Activity context, List<Comic> procedures) {
-        super(context, 0, procedures);
+    public ComicAdapter(Activity context, List<Result> comics) {
+        super(context, 0, comics);
         imageloader.init(ImageLoaderConfiguration.createDefault(context));
     }
 
@@ -58,14 +58,17 @@ public class ComicAdapter extends ArrayAdapter<Comic> {
                     R.layout.list_comics, parent, false);
         }
 
-        Comic comic = getItem(position);
+        Result comic = getItem(position);
 
         TextView nameTextView = (TextView) listItemView.findViewById(R.id.comic_title);
         nameTextView.setText(comic.getTitle());
 
         ImageView iconView = (ImageView) listItemView.findViewById(R.id.comic_icon);
-//        imageloader.displayImage(comic.getThumbnail(), iconView);
-        imageloader.displayImage("https://i0.wp.com/pulpcovers.com/wp-content/uploads/2013/11/Space-Detective-03-01-50x100.jpg", iconView);
+        String imgLink =
+                comic.getThumbnail().getPath() +
+                "." +
+                comic.getThumbnail().getExtension();
+        imageloader.displayImage(imgLink, iconView);
 
         return listItemView;
     }

@@ -4,9 +4,15 @@ import android.app.Activity;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.appbusiness.marvelcomics.data.model.Detail;
+import com.appbusiness.marvelcomics.data.model.Marvel;
+import com.appbusiness.marvelcomics.data.model.MarvelContract;
+import com.appbusiness.marvelcomics.data.model.Result;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  *
@@ -46,38 +52,68 @@ public class DetailModel implements IDetail.Model {
     }
 
     /**
+     * Method to set a custom views of a comic object.
      *
-     * Obtains data from an end point using {@link Retrofit} and {@link com.google.gson.Gson}
-     *
+     * @param comic - {@link Result}
      * @param tv - TextView
      * @param context - Activity
-     * @param comicID - String
      */
-    private void retrieveData(final TextView tv, final Activity context, String comicID) {
-        Log.d(TAG,"retrieveData");
-        // todo: implement API call (Retrofit)
+    private void setWidgets(Result comic, TextView tv, Activity context) {
 
-        Detail detail = new Detail("Title " + comicID, "A description","pages: 55","$19.99","Unknown author");
+        String details =
+                "ID: " + comic.getId() + "\n\n" +
+                "Title: " + comic.getTitle() + "\n\n" +
+                "Description:\n" +comic.getDescription() + "\n\n" +
+                "Pages: " + comic.getPageCount() + "\n\n" +
+                "Price: $" + comic.getPrices().get(0).getPrice() + "\n\n" +
+                "Author(s): " + comic.getCreators().getAvailable() ;
 
-        setWidgets(detail,tv, context);
+        tv.setText(details);
     }
 
     /**
-     * Method to set a custom views of a detail object.
+     * Obtains data from an end point using {@link Retrofit} and {@link com.google.gson.Gson}
      *
-     * @param detail - {@link Detail}
-     * @param tv - TextView
-     * @param context - Activity
+     * @param tv - {@link TextView}
+     * @param context - {@link Activity}
      */
-    private void setWidgets(Detail detail, TextView tv, Activity context) {
+    private void retrieveData(final TextView tv, final Activity context, String comicID) {
+        Log.d(TAG,"retrieveData");
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(MarvelContract.END_POINT)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        String details =
-                detail.getTitle() + "\n" +
-                detail.getDescription() + "\n" +
-                detail.getPageCount() + "\n" +
-                detail.getPrice() + "\n" +
-                detail.getAuthors() ;
+        MarvelContract marvelContract = retrofit.create(MarvelContract.class);
+        Call<Marvel> comicsRequest = marvelContract.getComic(
+                comicID,
+                MarvelContract.TS,
+                MarvelContract.PUBLIC_KEY,
+                MarvelContract.HASH);
 
-        tv.setText(details);
+        comicsRequest.enqueue(new Callback<Marvel>() {
+            @Override
+            public void onResponse(Call<Marvel> call, Response<Marvel> response) {
+                if(!response.isSuccessful()){
+                    Log.w(TAG,"unsuccessful: " + response.code());
+                    Log.i(TAG,call.request().toString());
+                    Log.i(TAG,call.request().headers().toString());
+                    Log.i(TAG,response.toString());
+
+                    return;
+                }
+
+                Log.i(TAG,"onResponse: "+ response.toString());
+                Marvel comics = response.body();
+                setWidgets(comics.getData().getResults().get(0), tv, context);
+            }
+
+            @Override
+            public void onFailure(Call<Marvel> call, Throwable t) {
+                Log.e(TAG,"onFailure: " + t.getMessage());
+                Log.i(TAG,call.request().toString());
+                Log.i(TAG,call.request().headers().toString());
+            }
+        });
     }
 }
